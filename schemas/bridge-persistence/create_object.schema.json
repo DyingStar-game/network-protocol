@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "persistence: create_object",
+  "description": "Sent by Horizon bridge to persistence to create or persist a new game object. Also used for create_object_from_gameserver.",
+  "type": "object",
+  "required": ["event_type", "name", "payload"],
+  "properties": {
+    "event_type": { "type": "string", "enum": ["core", "plugin"] },
+    "namespace":  { "type": ["string", "null"] },
+    "name": {
+      "type": "string",
+      "enum": ["create_object", "create_object_from_gameserver"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["object_type", "object_uuid", "object_data"],
+      "properties": {
+        "object_type": { "type": "string" },
+        "object_uuid": { "type": "string" },
+        "object_data": { "type": "object" }
+      }
+    }
+  }
+}

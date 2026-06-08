@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BridgeEventEnvelope",
+  "description": "Shared bridge envelope used in both directions between Horizon and all external services.",
+  "type": "object",
+  "required": ["event_type", "name", "payload"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": ["core", "plugin"],
+      "description": "core for system events, plugin for plugin-emitted events"
+    },
+    "namespace": {
+      "type": ["string", "null"],
+      "description": "Plugin namespace; only set when event_type is plugin"
+    },
+    "name": {
+      "type": "string",
+      "description": "Event name, e.g. create_object, get_all_items, items_chunk"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Event-specific payload"
+    }
+  }
+}

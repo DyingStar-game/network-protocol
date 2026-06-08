@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BridgeEventEnvelope (monitoring)",
+  "description": "Bridge envelope for the monitoring service. Extend with monitoring-specific event schemas as the protocol is defined.",
+  "type": "object",
+  "required": ["event_type", "name", "payload"],
+  "properties": {
+    "event_type": { "type": "string", "enum": ["core", "plugin"] },
+    "namespace":  { "type": ["string", "null"] },
+    "name":       { "type": "string" },
+    "payload":    { "type": "object" }
+  }
+}

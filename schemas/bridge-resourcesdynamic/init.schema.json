@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "resourcesDynamic: init",
+  "description": "Sent by Horizon bridge to resourcesDynamic to initialise a solar system's position schedule.",
+  "type": "object",
+  "required": ["event_type", "name", "payload"],
+  "properties": {
+    "event_type": { "type": "string", "enum": ["core", "plugin"] },
+    "namespace":  { "type": ["string", "null"] },
+    "name":       { "type": "string", "enum": ["init"] },
+    "payload": {
+      "type": "object",
+      "required": ["system_internal_name", "duration_s", "frequency", "from_timestamp"],
+      "properties": {
+        "system_internal_name": { "type": "string", "description": "Internal identifier for the star system, e.g. tarsis" },
+        "duration_s":           { "type": "number", "description": "Duration of the schedule window in seconds" },
+        "frequency":            { "type": "number", "description": "Number of positions per second" },
+        "from_timestamp":       { "type": "integer", "description": "Unix timestamp of the start of the window" }
+      }
+    }
+  }
+}

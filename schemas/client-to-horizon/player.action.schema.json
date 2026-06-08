@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "player.action",
+  "description": "Sent by the game client to trigger a player action (jump, spawn item, etc.).",
+  "type": "object",
+  "required": ["namespace", "event", "data"],
+  "properties": {
+    "namespace": { "type": "string", "enum": ["player"] },
+    "event":     { "type": "string", "enum": ["action"] },
+    "data": {
+      "type": "object",
+      "required": ["action"],
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "Action identifier, e.g. jump, spawn_box50cm"
+        }
+      }
+    }
+  }
+}

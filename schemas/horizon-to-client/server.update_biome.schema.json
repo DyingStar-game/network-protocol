@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "server.update_biome",
+  "description": "Sent by Horizon to update the biome on the client.",
+  "type": "object",
+  "required": ["namespace", "event", "data"],
+  "properties": {
+    "namespace": { "type": "string", "enum": ["server"] },
+    "event":     { "type": "string", "enum": ["update_biome"] },
+    "data":      { "type": "object" }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "player.gorc_zone_enter",
+  "description": "Sent by Horizon when the player enters a GORC replication zone.",
+  "type": "object",
+  "required": ["namespace", "event"],
+  "properties": {
+    "namespace": { "type": "string", "enum": ["player"] },
+    "event":     { "type": "string", "enum": ["gorc_zone_enter"] },
+    "data":      { "type": "object" }
+  }
+}

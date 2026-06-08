@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "persistence: update_object",
+  "description": "Sent by Horizon bridge to persistence to partially update a game object. Also used for update_object_from_external.",
+  "type": "object",
+  "required": ["event_type", "name", "payload"],
+  "properties": {
+    "event_type": { "type": "string", "enum": ["core", "plugin"] },
+    "namespace":  { "type": ["string", "null"] },
+    "name": {
+      "type": "string",
+      "enum": ["update_object", "update_object_from_external"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["object_type", "object_uuid", "object_data"],
+      "properties": {
+        "object_type": { "type": "string" },
+        "object_uuid": { "type": "string" },
+        "object_data": {
+          "type": "object",
+          "description": "Partial update; only changed fields are present"
+        }
+      }
+    }
+  }
+}

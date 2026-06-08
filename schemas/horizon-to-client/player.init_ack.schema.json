@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "player.init_ack",
+  "description": "Sent by Horizon to acknowledge a successful player.init, providing the player's server-assigned ID.",
+  "type": "object",
+  "required": ["namespace", "event"],
+  "properties": {
+    "namespace":  { "type": "string", "enum": ["player"] },
+    "event":      { "type": "string", "enum": ["init_ack"] },
+    "player_id":  { "type": "string", "description": "Server-assigned player UUID" },
+    "message":    { "type": "string" }
+  }
+}

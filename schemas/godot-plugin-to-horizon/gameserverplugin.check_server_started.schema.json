@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "gameserverplugin.check_server_started",
+  "description": "Sent by Horizon to the Godot server plugin to verify the game server is ready.",
+  "type": "object",
+  "required": ["namespace", "event", "data"],
+  "properties": {
+    "namespace": { "type": "string", "enum": ["gameserverplugin"] },
+    "event":     { "type": "string", "enum": ["check_server_started"] },
+    "data":      { "type": "object" }
+  }
+}

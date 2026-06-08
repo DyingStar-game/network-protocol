@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WebSocket envelope",
+  "description": "Base envelope used for all client ↔ horizon and godot-plugin ↔ horizon WebSocket messages.",
+  "type": "object",
+  "required": ["namespace", "event", "data"],
+  "properties": {
+    "namespace": {
+      "type": "string",
+      "description": "Message namespace: player, server, gameserverplugin, externalservices"
+    },
+    "event": {
+      "type": "string",
+      "description": "Event name within the namespace"
+    },
+    "data": {
+      "type": "object",
+      "description": "Event-specific payload"
+    }
+  }
+}

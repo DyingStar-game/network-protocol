@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "resourcesDynamic: transform",
+  "description": "Sent by Horizon bridge to resourcesDynamic to request the position/rotation schedule for a specific object.",
+  "type": "object",
+  "required": ["event_type", "name", "payload"],
+  "properties": {
+    "event_type": { "type": "string", "enum": ["core", "plugin"] },
+    "namespace":  { "type": ["string", "null"] },
+    "name":       { "type": "string", "enum": ["transform"] },
+    "payload": {
+      "type": "object",
+      "required": ["uuid", "duration_s", "frequency", "from_timestamp"],
+      "properties": {
+        "uuid":           { "type": "string" },
+        "duration_s":     { "type": "number" },
+        "frequency":      { "type": "number" },
+        "from_timestamp": { "type": "integer" }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "horizon-to-godot-plugin: player.move relay",
+  "description": "Relayed by Horizon to the Godot server plugin when a player moves. Note: player_id is at the top level, not inside data.",
+  "type": "object",
+  "required": ["namespace", "event", "player_id", "data"],
+  "properties": {
+    "namespace": { "type": "string", "enum": ["player"] },
+    "event":     { "type": "string", "enum": ["move"] },
+    "player_id": { "type": "string" },
+    "data": {
+      "type": "object",
+      "required": ["dir", "rot"],
+      "properties": {
+        "dir": { "$ref": "#/$defs/vec3" },
+        "rot": { "$ref": "#/$defs/vec3" }
+      }
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    }
+  }
+}

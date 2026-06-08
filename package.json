@@ -1,0 +1,12 @@
+{
+  "name": "network-protocol",
+  "version": "1.0.0",
+  "description": "DyingStar network protocol — JSON Schema registry and per-service E2E test suites",
+  "private": true,
+  "scripts": {
+    "validate": "node validate.js"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0"
+  }
+}

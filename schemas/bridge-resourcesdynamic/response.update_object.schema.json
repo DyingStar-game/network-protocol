@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "resourcesDynamic response: genericprops.update_object",
+  "description": "Sent by resourcesDynamic to Horizon with a time-window of positions/rotations for a specific object.",
+  "type": "object",
+  "required": ["namespace", "event", "data"],
+  "properties": {
+    "namespace": { "type": "string", "enum": ["genericprops"] },
+    "event":     { "type": "string", "enum": ["update_object"] },
+    "data": {
+      "type": "object",
+      "required": ["object_type", "object_uuid", "object_data"],
+      "properties": {
+        "object_type": { "type": "string" },
+        "object_uuid": { "type": "string" },
+        "object_data": {
+          "type": "object",
+          "required": ["from_timestamp", "positions", "rotations"],
+          "properties": {
+            "from_timestamp": { "type": "integer" },
+            "positions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/vec3" }
+            },
+            "rotations": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/vec3" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    }
+  }
+}

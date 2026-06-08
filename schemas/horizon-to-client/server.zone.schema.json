@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "server.zone",
+  "description": "Sent by Horizon to communicate zone information to the client.",
+  "type": "object",
+  "required": ["namespace", "event", "data"],
+  "properties": {
+    "namespace": { "type": "string", "enum": ["server"] },
+    "event":     { "type": "string", "enum": ["zone"] },
+    "data":      { "type": "object" }
+  }
+}
