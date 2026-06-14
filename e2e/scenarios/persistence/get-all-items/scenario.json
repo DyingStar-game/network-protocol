@@ -1,0 +1,19 @@
+{
+  "name": "persistence-get-all-items",
+  "mode": "client",
+  "url": "${PERSISTENCE_WS_URL}",
+  "sequence": [
+    {
+      "step": 1,
+      "action": "send",
+      "file": "step-01-send-get-all-items.json"
+    },
+    {
+      "step": 2,
+      "action": "receive-stream",
+      "schema": "bridge-persistence/response.items_chunk.schema.json",
+      "until": "step-02-terminal-items-end.json",
+      "terminalSchema": "bridge-persistence/response.items_end.schema.json"
+    }
+  ]
+}

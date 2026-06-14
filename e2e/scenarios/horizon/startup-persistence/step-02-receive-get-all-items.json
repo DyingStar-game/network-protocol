@@ -1,0 +1,6 @@
+{
+  "event_type": "core",
+  "namespace": null,
+  "name": "get_all_items",
+  "payload": {}
+}

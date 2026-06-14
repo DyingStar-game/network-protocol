@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "E2E scenario manifest",
+  "description": "Schema for scenario.json files used by the network-protocol e2e test framework.",
+  "type": "object",
+  "required": ["name", "mode", "sequence"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable scenario identifier"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["mock-server", "client"],
+      "description": "mock-server: TypeScript acts as the external service; client: TypeScript connects to a running service"
+    },
+    "services": {
+      "type": "array",
+      "description": "Required for mock-server mode. One entry per service to impersonate.",
+      "items": {
+        "type": "object",
+        "required": ["name", "port"],
+        "properties": {
+          "name": { "type": "string" },
+          "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "url": {
+      "type": "string",
+      "description": "Required for client mode. WebSocket URL of the target service. Supports ${ENV_VAR} interpolation."
+    },
+    "sequence": {
+      "type": "array",
+      "description": "Ordered list of steps to execute.",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/step" }
+    }
+  },
+  "if": { "properties": { "mode": { "const": "mock-server" } } },
+  "then": { "required": ["services"] },
+  "else": { "required": ["url"] },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "required": ["step", "action"],
+      "properties": {
+        "step": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based step number (informational)"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["send", "receive", "receive-stream"],
+          "description": "send: send file JSON to the connected peer; receive: wait for one message and validate it; receive-stream: collect messages until the terminal message arrives"
+        },
+        "service": {
+          "type": "string",
+          "description": "mock-server mode only. Name of the service whose socket to use."
+        },
+        "file": {
+          "type": "string",
+          "description": "Filename of the JSON payload (relative to the scenario directory). Required for send; used for matchFields on receive."
+        },
+        "schema": {
+          "type": "string",
+          "description": "Path to the JSON schema to validate the message against, relative to SCHEMAS_DIR."
+        },
+        "matchFields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Subset of top-level fields to compare on receive (ignores dynamic values like UUIDs/timestamps)."
+        },
+        "until": {
+          "type": "string",
+          "description": "receive-stream only. Filename of the terminal message that ends the stream."
+        },
+        "terminalSchema": {
+          "type": "string",
+          "description": "receive-stream only. Schema path (relative to SCHEMAS_DIR) to validate the terminal message against."
+        }
+      },
+      "additionalProperties": false,
+      "if": { "properties": { "action": { "const": "send" } } },
+      "then": { "required": ["file"] }
+    }
+  }
+}

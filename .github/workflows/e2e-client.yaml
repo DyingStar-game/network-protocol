@@ -1,0 +1,117 @@
+name: "E2E — Client (persistence)"
+
+on:
+  push:
+    paths:
+      - "network-protocol/e2e/**"
+      - "network-protocol/schemas/**"
+  pull_request:
+    paths:
+      - "network-protocol/e2e/**"
+      - "network-protocol/schemas/**"
+  workflow_dispatch:
+    inputs:
+      persistence_image:
+        description: "Persistence Docker image (e.g. harbor.example.com/dyingstar/persistence:latest)"
+        required: true
+        default: "harbor.example.com/dyingstar/persistence:latest"
+      scenario_filter:
+        description: "Optional scenario path filter (e.g. persistence/get-all-items)"
+        required: false
+        default: "persistence"
+
+jobs:
+  e2e-client:
+    name: Client scenarios
+    runs-on: ubuntu-latest
+
+    env:
+      PERSISTENCE_IMAGE: ${{ github.event.inputs.persistence_image || 'harbor.example.com/dyingstar/persistence:latest' }}
+      SCENARIO_FILTER: ${{ github.event.inputs.scenario_filter || 'persistence' }}
+      NETWORK_PROTOCOL_SCHEMAS_DIR: ${{ github.workspace }}/network-protocol/schemas
+      # Used by client scenarios (${PERSISTENCE_WS_URL} in scenario.json)
+      PERSISTENCE_WS_URL: ws://localhost:9100/ws
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: network-protocol/e2e/package.json
+
+      - name: Install e2e dependencies
+        working-directory: network-protocol/e2e
+        run: npm ci
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: harbor.example.com
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Pull service images
+        run: docker pull "$PERSISTENCE_IMAGE"
+
+      # ScyllaDB — required by the persistence service.
+      # We run it on host network so the persistence container can reach it at 127.0.0.1.
+      - name: Start ScyllaDB
+        run: |
+          docker run --rm --detach \
+            --network host \
+            --name scylladb-e2e \
+            scylladb/scylla:6.2 \
+            --smp 1 --memory 512M --developer-mode 1
+
+      - name: Wait for ScyllaDB to be ready
+        run: |
+          echo "Waiting for ScyllaDB..."
+          for i in $(seq 1 30); do
+            if docker exec scylladb-e2e nodetool status 2>/dev/null | grep -q "^UN"; then
+              echo "ScyllaDB is ready"
+              break
+            fi
+            echo "  attempt $i/30 — not ready yet"
+            sleep 5
+          done
+          docker exec scylladb-e2e nodetool status
+
+      - name: Start persistence service
+        run: |
+          docker run --rm --detach \
+            --network host \
+            --name persistence-e2e \
+            -e SCYLLA_NODES=127.0.0.1 \
+            -e SCYLLA_KEYSPACE=dyingstar \
+            -e WS_PORT=9100 \
+            "$PERSISTENCE_IMAGE"
+
+      - name: Wait for persistence to be ready
+        run: |
+          echo "Waiting for persistence WebSocket..."
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:9101/health > /dev/null 2>&1; then
+              echo "Persistence is ready"
+              break
+            fi
+            echo "  attempt $i/20 — not ready yet"
+            sleep 3
+          done
+
+      - name: Run client scenarios
+        working-directory: network-protocol/e2e
+        run: SCENARIO_FILTER="$SCENARIO_FILTER" npm test
+
+      - name: Show persistence logs on failure
+        if: failure()
+        run: docker logs persistence-e2e || true
+
+      - name: Stop containers (always)
+        if: always()
+        run: |
+          docker stop persistence-e2e || true
+          docker stop scylladb-e2e || true
