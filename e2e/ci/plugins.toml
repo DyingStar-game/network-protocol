@@ -1,0 +1,57 @@
+# ============================================================================
+# CI override of plugins.toml for the e2e mock-server test job.
+#
+# All service URLs point to localhost so that the Horizon Docker container
+# (run with --network host) connects to the TypeScript mock WebSocket servers
+# started by the test runner on the same host.
+# ============================================================================
+
+[ds_game_server]
+log_level = "info"
+game_servers = ["ws://127.0.0.1:8980"]
+servers_mode = "single"
+split_rule = "fps:20"
+
+[ds_genericprops]
+log_level = "info"
+
+[ds_player_authentication]
+log_level = "info"
+
+[ds_props]
+log_level = "info"
+
+[ds_services]
+log_level = "info"
+resources_dynamic_address = "127.0.0.1:9200"
+
+[ds_audio]
+log_level = "info"
+
+[ds_bridge]
+log_level = "debug"
+
+[[ds_bridge.services]]
+name = "persistence"
+url = "ws://127.0.0.1:9100/ws"
+subscribe = [
+    "plugin:genericprops:create_object",
+    "plugin:genericprops:create_object_from_gameserver",
+    "plugin:genericprops:update_object",
+    "plugin:genericprops:update_object_from_external",
+    "plugin:bridge_persistence:get_all_items",
+    "plugin:bridge_persistence:player_spawn",
+]
+
+[[ds_bridge.services]]
+name = "monitoring"
+url = "ws://127.0.0.1:9300/ws"
+subscribe = [
+    "core:player_connected",
+    "core:player_disconnected",
+    "plugin:genericprops:create_object",
+    "plugin:genericprops:create_object_from_gameserver",
+    "plugin:ds_player_authentication:player_authenticated",
+    "plugin:ds_game_server:server_registered",
+    "plugin:ds_game_server:server_unregistered",
+]

@@ -1,0 +1,6 @@
+{
+  "event_type": "bridge",
+  "namespace": null,
+  "name": "connected",
+  "payload": { "is_reconnection": false }
+}

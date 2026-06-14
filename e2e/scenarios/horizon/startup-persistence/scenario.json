@@ -1,0 +1,31 @@
+{
+  "name": "horizon-startup-persistence",
+  "mode": "mock-server",
+  "services": [
+    { "name": "persistence", "port": 9100 },
+    { "name": "resourcesdynamic", "port": 9200 }
+  ],
+  "sequence": [
+    {
+      "step": 1,
+      "service": "persistence",
+      "action": "receive",
+      "file": "step-01-receive-handshake.json",
+      "matchFields": ["event_type", "name"]
+    },
+    {
+      "step": 2,
+      "service": "persistence",
+      "action": "receive",
+      "file": "step-02-receive-get-all-items.json",
+      "schema": "bridge-persistence/get_all_items.schema.json",
+      "matchFields": ["event_type", "name"]
+    },
+    {
+      "step": 3,
+      "service": "persistence",
+      "action": "send",
+      "file": "step-03-send-items-end.json"
+    }
+  ]
+}

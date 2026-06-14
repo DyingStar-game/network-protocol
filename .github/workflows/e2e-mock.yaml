@@ -1,0 +1,76 @@
+name: "E2E — Mock server (Horizon)"
+
+# Run when anything in the e2e framework or schemas changes, or on manual trigger.
+on:
+  push:
+    paths:
+      - "network-protocol/e2e/**"
+      - "network-protocol/schemas/**"
+  pull_request:
+    paths:
+      - "network-protocol/e2e/**"
+      - "network-protocol/schemas/**"
+  workflow_dispatch:
+    inputs:
+      horizon_image:
+        description: "Horizon Docker image to test (e.g. harbor.example.com/dyingstar/horizon:latest)"
+        required: true
+        default: "harbor.example.com/dyingstar/horizon:latest"
+      scenario_filter:
+        description: "Optional scenario path filter (e.g. horizon/startup-persistence)"
+        required: false
+        default: "horizon"
+
+jobs:
+  e2e-mock:
+    name: Mock-server scenarios
+    runs-on: ubuntu-latest
+
+    env:
+      HORIZON_IMAGE: ${{ github.event.inputs.horizon_image || 'harbor.example.com/dyingstar/horizon:latest' }}
+      SCENARIO_FILTER: ${{ github.event.inputs.scenario_filter || 'horizon' }}
+      NETWORK_PROTOCOL_SCHEMAS_DIR: ${{ github.workspace }}/network-protocol/schemas
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: network-protocol/e2e/package.json
+
+      - name: Install e2e dependencies
+        working-directory: network-protocol/e2e
+        run: npm ci
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: harbor.example.com
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Pull Horizon image
+        run: docker pull "$HORIZON_IMAGE"
+
+      # Start the TypeScript mock servers in the background, then launch Horizon.
+      # Both processes share the host network so Horizon connects to localhost:<port>.
+      - name: Run mock-server scenarios
+        working-directory: network-protocol/e2e
+        run: |
+          # Start Horizon with the CI plugins.toml (redirects all service URLs to localhost)
+          docker run --rm --detach \
+            --network host \
+            --name horizon-e2e \
+            -v "${{ github.workspace }}/network-protocol/e2e/ci/plugins.toml:/app/plugins.toml:ro" \
+            "$HORIZON_IMAGE"
+
+          # Run the Mocha tests (mock servers start inside the test process)
+          SCENARIO_FILTER="$SCENARIO_FILTER" npm test
+
+      - name: Stop Horizon container (always)
+        if: always()
+        run: docker stop horizon-e2e || true
